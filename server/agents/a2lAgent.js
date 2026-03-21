@@ -16,15 +16,14 @@ function parseIcalEvents(rawIcal) {
       if (!match) return null;
       return match[0].replace(/^[^:]+:/, "").trim();
     };
-    const dtstart = get("DTSTART");
-    const dtend = get("DTEND");
+    const dtend = parseIcalDate(get("DTEND"));
     const summary = get("SUMMARY")?.replace(/\\,/g, ",").replace(/\\n/g, " ");
     const description = get("DESCRIPTION")
       ?.replace(/\\,/g, ",")
       .replace(/\\n/g, "\n");
     const location = get("LOCATION");
     if (summary) {
-      events.push({ dtstart, dtend, summary, description, location });
+      events.push({ dtend, summary, description, location });
     }
   }
   return events;
@@ -51,7 +50,7 @@ const prompt = PromptTemplate.fromTemplate(`
 You are Agent 1 — the A2L (Avenue to Learn) academic deadline extractor.
 
 You have been given a list of upcoming calendar events from a McMaster University student's Avenue to Learn account.
-Each event has: dtstart (start date/time), dtend (end/due date time), summary (title), description, and location.
+Each event has: dtend (end/due date time), summary (title), description, and location.
 
 Extract ALL assignments, quizzes, tests, exams, and submissions. 
 For each item return:
@@ -93,7 +92,7 @@ export async function runA2LAgent(a2lUrl) {
     // Parse all events and filter to those whose DTEND is today or in the future
     const allEvents = parseIcalEvents(rawIcal);
     const upcomingEvents = allEvents.filter((e) => {
-      const iso = parseIcalDate(e.dtend);
+      const iso = e.dtend;
       if (!iso) return false;
       return new Date(iso) >= todayDate;
     });
