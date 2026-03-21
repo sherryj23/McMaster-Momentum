@@ -20,7 +20,7 @@ function isValidIcalUrl(url) {
 }
 
 router.post("/run", async (req, res) => {
-  const { a2lUrl, extraTasks } = req.body;
+  const { a2lUrl, outlookUrl, extraTasks } = req.body;
 
   if (!a2lUrl || !isValidIcalUrl(a2lUrl)) {
     return res.status(400).json({ error: "A valid A2L iCal URL is required." });
@@ -41,18 +41,31 @@ router.post("/run", async (req, res) => {
       res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
     };
 
+    // AGENT 1 — A2L
     send("status", { agent: 1, label: "Reading A2L deadlines", status: "running" });
     const a2lDeadlines = await runA2LAgent(a2lUrl);
     send("status", { agent: 1, label: "Reading A2L deadlines", status: "done", data: a2lDeadlines });
 
-    send("status", { agent: 2, label: "Scanning email + calendar", status: "running" });
-    const emailCalData = await runEmailCalAgent();
-    send("status", { agent: 2, label: "Scanning email + calendar", status: "done", data: emailCalData });
+    // AGENT 2 — Outlook iCal
+    send("status", { agent: 2, label: "Scanning Outlook calendar", status: "running" });
+    let outlookData = "No Outlook calendar provided.";
+    if (outlookUrl) {
+      try {
+        outlookData = await fetchIcal(outlookUrl);
+        console.log("Outlook iCal fetched, length:", outlookData.length);
+      } catch (e) {
+        console.error("Outlook fetch error:", e.message);
+      }
+    }
+    const emailCalData = await runEmailCalAgent("No email data.", outlookData);
+    send("status", { agent: 2, label: "Scanning Outlook calendar", status: "done", data: emailCalData });
 
+    // AGENT 3 — Extra tasks
     send("status", { agent: 3, label: "Extracting extra tasks", status: "running" });
     const extractedTasks = await runInterviewAgent(extraTasks || "");
     send("status", { agent: 3, label: "Extracting extra tasks", status: "done", data: extractedTasks });
 
+    // AGENT 4 — Day planner
     send("status", { agent: 4, label: "Building your day plan", status: "running" });
     const dayPlan = await runPlannerAgent(a2lDeadlines, emailCalData, extractedTasks);
     send("status", { agent: 4, label: "Building your day plan", status: "done", data: dayPlan });
