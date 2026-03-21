@@ -1,13 +1,92 @@
-body,
-#root {
-  background: #f5f3ee;
+/* ── Light theme (default) ── */
+.setup-screen {
+  --ss-bg: #f5f3ee;
+  --ss-card: #ffffff;
+  --ss-border: #e5e4e7;
+  --ss-text: #6b6375;
+  --ss-heading: #08060d;
+  --ss-input-bg: #fafaf8;
+  --ss-icon-bg: #f0eeea;
+  --ss-badge-ok-bg: #dcfce7;
+  --ss-badge-ok-text: #15803d;
+  --ss-badge-ok-border: #bbf7d0;
+  --ss-badge-no-bg: #fee2e2;
+  --ss-badge-no-text: #dc2626;
+  --ss-badge-no-border: #fecaca;
+  --ss-btn-bg: #ffffff;
+  --ss-btn-hover: #f0eeea;
+  --ss-ms-btn: #0078d4;
+  --ss-ms-btn-hover: #0062a3;
+  --ss-focus-ring: #a78bfa;
+  --ss-plan-hover-shadow: rgba(0, 0, 0, 0.1) 0 8px 24px;
+
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 48px 24px 56px;
+  text-align: left;
+  min-height: 100svh;
+  background: var(--ss-bg);
+  transition: background 0.25s;
+  box-sizing: border-box;
 }
 
-.setup-screen {
-  max-width: 430px;
-  margin: 0 auto;
-  padding: 40px 20px 48px;
-  text-align: left;
+/* ── Dark / purple theme ── */
+.setup-screen.dark {
+  --ss-bg: #0a0812;
+  --ss-card: #130f1e;
+  --ss-border: #2a2240;
+  --ss-text: #9b8ec4;
+  --ss-heading: #ede9fa;
+  --ss-input-bg: #0d0a18;
+  --ss-icon-bg: #1e1830;
+  --ss-badge-ok-bg: #0d2314;
+  --ss-badge-ok-text: #4ade80;
+  --ss-badge-ok-border: #14532d;
+  --ss-badge-no-bg: #1f0a0a;
+  --ss-badge-no-text: #f87171;
+  --ss-badge-no-border: #7f1d1d;
+  --ss-btn-bg: #130f1e;
+  --ss-btn-hover: #1e1830;
+  --ss-ms-btn: #7c3aed;
+  --ss-ms-btn-hover: #6d28d9;
+  --ss-focus-ring: #a78bfa;
+  --ss-plan-hover-shadow: rgba(139, 92, 246, 0.25) 0 8px 32px;
+
+  background: var(--ss-bg);
+}
+
+/* Override page background when dark */
+.setup-screen.dark ~ * {
+  background: #0a0812;
+}
+
+/* Theme toggle — fixed upper right */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 100;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--ss-border);
+  background: var(--ss-card);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s,
+    border-color 0.25s;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.theme-toggle:hover {
+  background: var(--ss-btn-hover);
 }
 
 /* Greeting */
@@ -20,13 +99,15 @@ body,
   font-weight: 600;
   margin: 0 0 4px;
   letter-spacing: -0.5px;
-  color: var(--text-h);
+  color: var(--ss-heading);
+  transition: color 0.25s;
 }
 
 .setup-greeting p {
   font-size: 15px;
   margin: 0;
-  color: var(--text);
+  color: var(--ss-text);
+  transition: color 0.25s;
 }
 
 /* Cards stack */
@@ -39,10 +120,13 @@ body,
 
 /* Individual card */
 .connection-card {
-  background: #fff;
-  border: 1px solid var(--border);
+  background: var(--ss-card);
+  border: 1px solid var(--ss-border);
   border-radius: 14px;
   padding: 16px;
+  transition:
+    background 0.25s,
+    border-color 0.25s;
 }
 
 .card-header {
@@ -51,20 +135,17 @@ body,
   gap: 12px;
 }
 
-.card-header-spaced {
-  margin-bottom: 14px;
-}
-
 .card-icon {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: #f0eeea;
+  background: var(--ss-icon-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 19px;
   flex-shrink: 0;
+  transition: background 0.25s;
 }
 
 .card-info {
@@ -76,15 +157,17 @@ body,
   display: block;
   font-weight: 600;
   font-size: 15px;
-  color: var(--text-h);
+  color: var(--ss-heading);
   line-height: 1.3;
+  transition: color 0.25s;
 }
 
 .card-subtitle {
   display: block;
   font-size: 13px;
-  color: var(--text);
+  color: var(--ss-text);
   line-height: 1.3;
+  transition: color 0.25s;
 }
 
 .status-badge {
@@ -94,18 +177,22 @@ body,
   font-weight: 500;
   flex-shrink: 0;
   white-space: nowrap;
+  transition:
+    background 0.25s,
+    color 0.25s,
+    border-color 0.25s;
 }
 
 .status-badge.connected {
-  background: #dcfce7;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
+  background: var(--ss-badge-ok-bg);
+  color: var(--ss-badge-ok-text);
+  border: 1px solid var(--ss-badge-ok-border);
 }
 
 .status-badge.not-connected {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: var(--ss-badge-no-bg);
+  color: var(--ss-badge-no-text);
+  border: 1px solid var(--ss-badge-no-border);
 }
 
 /* Card body */
@@ -122,19 +209,22 @@ body,
 .url-input {
   flex: 1;
   padding: 8px 11px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--ss-border);
   border-radius: 8px;
   font-size: 13px;
-  color: var(--text);
-  background: #fafaf8;
-  font-family: var(--mono);
+  color: var(--ss-heading);
+  background: var(--ss-input-bg);
+  font-family: var(--mono, monospace);
   min-width: 0;
-  transition: border-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.25s,
+    color 0.25s;
 }
 
 .url-input:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--ss-focus-ring);
 }
 
 .url-input.full-width {
@@ -144,25 +234,28 @@ body,
 
 .btn-change {
   padding: 8px 14px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--ss-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--ss-btn-bg);
   font-size: 13px;
   cursor: pointer;
-  color: var(--text-h);
+  color: var(--ss-heading);
   white-space: nowrap;
-  transition: background 0.15s;
+  transition:
+    background 0.15s,
+    color 0.25s,
+    border-color 0.25s;
 }
 
 .btn-change:hover {
-  background: #f5f3ee;
+  background: var(--ss-btn-hover);
 }
 
-/* Microsoft sign-in button */
+/* Microsoft button */
 .btn-microsoft {
   width: 100%;
   padding: 12px 16px;
-  background: #0078d4;
+  background: var(--ss-ms-btn);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -177,7 +270,7 @@ body,
 }
 
 .btn-microsoft:hover {
-  background: #0062a3;
+  background: var(--ss-ms-btn-hover);
 }
 
 .microsoft-logo {
@@ -214,7 +307,8 @@ body,
   gap: 10px;
   margin: 12px 0;
   font-size: 13px;
-  color: var(--text);
+  color: var(--ss-text);
+  transition: color 0.25s;
 }
 
 .divider-row::before,
@@ -222,61 +316,83 @@ body,
   content: "";
   flex: 1;
   height: 1px;
-  background: var(--border);
+  background: var(--ss-border);
+  transition: background 0.25s;
 }
 
-/* Extra tasks card */
+/* Extra tasks */
 .extra-card {
-  background: #fff;
-  border: 1px solid var(--border);
+  background: var(--ss-card);
+  border: 1px solid var(--ss-border);
   border-radius: 14px;
   padding: 16px;
   margin-bottom: 10px;
+  transition:
+    background 0.25s,
+    border-color 0.25s;
 }
 
 .extra-card label {
   display: block;
   font-size: 15px;
   font-weight: 500;
-  color: var(--text-h);
+  color: var(--ss-heading);
   margin-bottom: 10px;
+  transition: color 0.25s;
 }
 
 .extra-textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--ss-border);
   border-radius: 8px;
   font-size: 14px;
-  color: var(--text-h);
-  background: #fafaf8;
+  color: var(--ss-heading);
+  background: var(--ss-input-bg);
   resize: vertical;
   min-height: 80px;
-  font-family: var(--sans);
+  font-family: var(--sans, system-ui, sans-serif);
   box-sizing: border-box;
   line-height: 1.5;
-  transition: border-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.25s,
+    color 0.25s;
 }
 
 .extra-textarea:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--ss-focus-ring);
 }
 
 /* Plan button */
 .btn-plan {
   width: 100%;
   padding: 16px;
-  background: #fff;
-  color: var(--text-h);
-  border: 1px solid var(--border);
+  background: var(--ss-card);
+  color: var(--ss-heading);
+  border: 1px solid var(--ss-border);
   border-radius: 14px;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition:
+    box-shadow 0.2s,
+    background 0.25s,
+    color 0.25s,
+    border-color 0.25s;
 }
 
-.btn-plan:hover {
-  box-shadow: var(--shadow);
+.btn-plan:hover:not(:disabled) {
+  box-shadow: var(--ss-plan-hover-shadow);
+}
+
+.setup-screen.dark .btn-plan:hover:not(:disabled) {
+  background: #1e1830;
+  border-color: #7c3aed;
+}
+
+/* Also tint the page background when dark mode is active */
+.setup-screen.dark {
+  background: linear-gradient(160deg, #0a0812 0%, #100d1f 50%, #0d0a18 100%);
 }
