@@ -21,7 +21,8 @@
   --ss-plan-hover-shadow: rgba(0, 0, 0, 0.1) 0 8px 24px;
 
   position: relative;
-  max-width: 760px;
+  width: 100%;
+  max-width: 700px;
   margin: 0 auto;
   padding: 48px 24px 56px;
   text-align: left;
