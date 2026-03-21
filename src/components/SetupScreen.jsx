@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ConnectionCard from "./ConnectionCard";
 import {
   saveConnections,
@@ -38,6 +38,22 @@ export default function SetupScreen({ onPlan }) {
   const [a2lError, setA2lError] = useState("");
   const [outlookUrl, setOutlookUrl] = useState(saved.outlookUrl || "");
   const [extraTasks, setExtraTasks] = useState(loadExtra());
+  const [dark, setDark] = useState(
+    () => localStorage.getItem("theme") === "dark",
+  );
+
+  useEffect(() => {
+    document.body.style.background = dark ? "#0a0812" : "";
+    document.body.style.transition = "background 0.25s";
+  }, [dark]);
+
+  function toggleDark() {
+    setDark((d) => {
+      const next = !d;
+      localStorage.setItem("theme", next ? "dark" : "light");
+      return next;
+    });
+  }
 
   const a2lConnected = Boolean(a2lUrl && !a2lEditing);
   const googleConnected = true;
@@ -70,7 +86,15 @@ export default function SetupScreen({ onPlan }) {
   }
 
   return (
-    <div className="setup-screen">
+    <div className={`setup-screen${dark ? " dark" : ""}`}>
+      <button
+        className="theme-toggle"
+        onClick={toggleDark}
+        aria-label="Toggle dark mode"
+      >
+        {dark ? "☀️" : "🌙"}
+      </button>
+
       <div className="setup-greeting">
         <h1>{getGreeting()}.</h1>
         <p>Connect your sources and I'll plan your day.</p>
@@ -114,7 +138,7 @@ export default function SetupScreen({ onPlan }) {
             onClick={() =>
               window.open(
                 "https://outlook.live.com/calendar/0/options/calendar/SharedCalendars",
-                "_blank"
+                "_blank",
               )
             }
           >
@@ -168,7 +192,14 @@ export default function SetupScreen({ onPlan }) {
       </button>
 
       {!a2lConnected && (
-        <p style={{ textAlign: "center", fontSize: 13, color: "#9ca3af", marginTop: 8 }}>
+        <p
+          style={{
+            textAlign: "center",
+            fontSize: 13,
+            color: "#9ca3af",
+            marginTop: 8,
+          }}
+        >
           Paste and save your A2L iCal URL to continue
         </p>
       )}
