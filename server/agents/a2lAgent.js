@@ -17,30 +17,33 @@ function parseIcalEvents(rawIcal) {
       return match[0].replace(/^[^:]+:/, "").trim();
     };
     const dtstart = get("DTSTART");
+    const dtend = get("DTEND");
     const summary = get("SUMMARY")?.replace(/\\,/g, ",").replace(/\\n/g, " ");
     const description = get("DESCRIPTION")
       ?.replace(/\\,/g, ",")
       .replace(/\\n/g, "\n");
     const location = get("LOCATION");
-    if (dtstart && summary) {
-      events.push({ dtstart, summary, description, location });
+    if (summary) {
+      events.push({ dtstart, dtend, summary, description, location });
     }
   }
   return events;
 }
 
-// Parse a DTSTART value (handles DATE-only and DATE-TIME with/without TZID)
-function parseDtstart(dtstart) {
-  if (!dtstart) return null;
-  // Strip timezone prefix like "TZID=America/Toronto:" — already stripped by get()
-  // Format: 20260323T235900 or 20260323T235900Z or 20260323
-  const clean = dtstart.replace(/[TZ]/g, (m, i, s) =>
-    m === "T" ? "T" : m === "Z" ? "" : m,
+// Parse an iCal date value and convert UTC (Z suffix) to EDT (UTC-4)
+function parseIcalDate(value) {
+  if (!value) return null;
+  const m = value.match(
+    /^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z?))?/,
   );
-  // Normalize: 20260323T235900 → 2026-03-23T23:59:00
-  const m = dtstart.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2}))?/);
   if (!m) return null;
-  const [, y, mo, d, h = "00", min = "00", s = "00"] = m;
+  const [, y, mo, d, h = "00", min = "00", s = "00", z = ""] = m;
+  if (z === "Z") {
+    // Convert UTC to EDT (UTC-4)
+    const utc = new Date(`${y}-${mo}-${d}T${h}:${min}:${s}Z`);
+    utc.setHours(utc.getHours() - 4);
+    return utc.toISOString().replace("Z", "").substring(0, 19);
+  }
   return `${y}-${mo}-${d}T${h}:${min}:${s}`;
 }
 
@@ -48,7 +51,7 @@ const prompt = PromptTemplate.fromTemplate(`
 You are Agent 1 — the A2L (Avenue to Learn) academic deadline extractor.
 
 You have been given a list of upcoming calendar events from a McMaster University student's Avenue to Learn account.
-Each event has: dtstart (due date/time), summary (title), description, and location.
+Each event has: dtstart (start date/time), dtend (end/due date time), summary (title), description, and location.
 
 Extract ALL assignments, quizzes, tests, exams, and submissions. 
 For each item return:
@@ -87,10 +90,10 @@ export async function runA2LAgent(a2lUrl) {
     const today = new Date().toISOString().split("T")[0];
     const todayDate = new Date(today);
 
-    // Parse all events and filter to today + future only (by DTSTART)
+    // Parse all events and filter to those whose DTEND is today or in the future
     const allEvents = parseIcalEvents(rawIcal);
     const upcomingEvents = allEvents.filter((e) => {
-      const iso = parseDtstart(e.dtstart);
+      const iso = parseIcalDate(e.dtend);
       if (!iso) return false;
       return new Date(iso) >= todayDate;
     });
