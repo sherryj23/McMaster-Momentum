@@ -15,28 +15,55 @@ function getGreeting() {
   return "Good evening";
 }
 
+function isValidIcalUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return (
+      (parsed.protocol === "http:" || parsed.protocol === "https:") &&
+      (url.includes("avenue.mcmaster.ca") ||
+        url.includes(".ics") ||
+        url.includes("calendar/feed") ||
+        url.includes("calendar/ical"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function SetupScreen({ onPlan }) {
   const saved = loadConnections();
 
   const [a2lUrl, setA2lUrl] = useState(saved.a2lUrl || "");
   const [a2lEditing, setA2lEditing] = useState(!saved.a2lUrl);
+  const [a2lError, setA2lError] = useState("");
   const [outlookUrl, setOutlookUrl] = useState(saved.outlookUrl || "");
   const [extraTasks, setExtraTasks] = useState(loadExtra());
 
   const a2lConnected = Boolean(a2lUrl && !a2lEditing);
-  // Google Calendar connected via MCP — static for setup screen
   const googleConnected = true;
 
   function handleA2lChange() {
     if (!a2lEditing) {
       setA2lEditing(true);
-    } else if (a2lUrl.trim()) {
-      saveConnections({ ...loadConnections(), a2lUrl: a2lUrl.trim() });
+      setA2lError("");
+    } else {
+      const trimmed = a2lUrl.trim();
+      if (!trimmed) {
+        setA2lError("URL cannot be empty.");
+        return;
+      }
+      if (!isValidIcalUrl(trimmed)) {
+        setA2lError("Must be a valid iCal URL from avenue.mcmaster.ca");
+        return;
+      }
+      setA2lError("");
+      saveConnections({ ...loadConnections(), a2lUrl: trimmed });
       setA2lEditing(false);
     }
   }
 
   function handlePlan() {
+    if (!a2lConnected) return;
     saveConnections({ ...loadConnections(), outlookUrl: outlookUrl.trim() });
     saveExtra(extraTasks);
     onPlan?.({ a2lUrl, outlookUrl, extraTasks });
@@ -50,7 +77,6 @@ export default function SetupScreen({ onPlan }) {
       </div>
 
       <div className="connection-cards">
-        {/* Avenue to Learn */}
         <ConnectionCard
           icon="🎓"
           title="Avenue to Learn"
@@ -70,25 +96,37 @@ export default function SetupScreen({ onPlan }) {
               {a2lEditing ? "save" : "change"}
             </button>
           </div>
+          {a2lError && (
+            <p style={{ color: "#dc2626", fontSize: 12, marginTop: 6 }}>
+              {a2lError}
+            </p>
+          )}
         </ConnectionCard>
 
-        {/* Outlook / Email */}
         <ConnectionCard
           icon="📧"
           title="Outlook / Email"
-          subtitle="Microsoft 365 or paste credentials"
+          subtitle="Microsoft 365 iCal feed"
           connected={Boolean(outlookUrl)}
         >
-          <button className="btn-microsoft">
+          <button
+            className="btn-microsoft"
+            onClick={() =>
+              window.open(
+                "https://outlook.live.com/calendar/0/options/calendar/SharedCalendars",
+                "_blank"
+              )
+            }
+          >
             <span className="microsoft-logo" aria-hidden="true">
               <span className="ms-red" />
               <span className="ms-green" />
               <span className="ms-blue" />
               <span className="ms-yellow" />
             </span>
-            Sign in with Microsoft
+            Get Outlook iCal URL
           </button>
-          <div className="divider-row">or paste iCal URL</div>
+          <div className="divider-row">then paste it here</div>
           <input
             className="url-input full-width"
             type="url"
@@ -98,7 +136,6 @@ export default function SetupScreen({ onPlan }) {
           />
         </ConnectionCard>
 
-        {/* Google Calendar */}
         <ConnectionCard
           icon="📅"
           title="Google Calendar"
@@ -107,7 +144,6 @@ export default function SetupScreen({ onPlan }) {
         />
       </div>
 
-      {/* Extra tasks */}
       <div className="extra-card">
         <label htmlFor="extra-tasks">Anything else on your plate today?</label>
         <textarea
@@ -119,9 +155,23 @@ export default function SetupScreen({ onPlan }) {
         />
       </div>
 
-      <button className="btn-plan" onClick={handlePlan}>
+      <button
+        className="btn-plan"
+        onClick={handlePlan}
+        disabled={!a2lConnected}
+        style={{
+          opacity: a2lConnected ? 1 : 0.4,
+          cursor: a2lConnected ? "pointer" : "not-allowed",
+        }}
+      >
         Plan my day →
       </button>
+
+      {!a2lConnected && (
+        <p style={{ textAlign: "center", fontSize: 13, color: "#9ca3af", marginTop: 8 }}>
+          Paste and save your A2L iCal URL to continue
+        </p>
+      )}
     </div>
   );
 }

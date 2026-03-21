@@ -1,4 +1,3 @@
-// src/lib/anthropic.js
 const BASE_URL = 'http://localhost:3001'
 
 export async function runAgents(setupData, onStatus) {
@@ -7,6 +6,11 @@ export async function runAgents(setupData, onStatus) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(setupData),
   })
+
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.error || 'Something went wrong')
+  }
 
   const reader = res.body.getReader()
   const decoder = new TextDecoder()
@@ -26,9 +30,6 @@ export async function runAgents(setupData, onStatus) {
           const data = JSON.parse(line.slice(6))
           onStatus(data)
         } catch {}
-      }
-      if (line.startsWith('event: complete')) {
-        // handled via onStatus with complete event
       }
     }
   }

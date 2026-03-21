@@ -10,6 +10,7 @@ const AGENTS = [
 
 export default function AgentStatus({ setupData, onComplete }) {
   const [statuses, setStatuses] = useState({})
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     runAgents(setupData, (event) => {
@@ -19,8 +20,17 @@ export default function AgentStatus({ setupData, onComplete }) {
       if (event.dayPlan) {
         onComplete(event.dayPlan)
       }
-    })
+    }).catch(err => setError(err.message))
   }, [])
+
+  if (error) {
+    return (
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '60px 20px', textAlign: 'center' }}>
+        <p style={{ fontSize: 15, color: '#dc2626', fontWeight: 500, marginBottom: 8 }}>Something went wrong</p>
+        <p style={{ fontSize: 14, color: '#6b7280' }}>{error}</p>
+      </div>
+    )
+  }
 
   return (
     <div style={{ maxWidth: 430, margin: '0 auto', padding: '60px 20px' }}>

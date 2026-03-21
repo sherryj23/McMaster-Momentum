@@ -3,6 +3,7 @@ import SetupScreen from './components/SetupScreen'
 import AgentStatus from './components/AgentStatus'
 import DayPlan from './components/DayPlan'
 
+// screens: 'setup' | 'running' | 'results'
 export default function App() {
   const [screen, setScreen] = useState('setup')
   const [planData, setPlanData] = useState(null)
